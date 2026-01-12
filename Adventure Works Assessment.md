@@ -2,45 +2,56 @@ This data is based on Microsoft's AdventureWorks database.
 
 Q: Show the first name and the email address of customer with CompanyName 'Bike World'.
 
+````sql
 SELECT firstname, emailaddress
 FROM Customer
 WHERE companyname = "Bike World";
+````
 
 Q: Show the CompanyName for all customers with an address in City 'Dallas'.
 
+````sql
 SELECT companyname
 FROM Customer AS cust
 JOIN CustomerAddress AS custa ON cust.customerid = custa.customerid
 JOIN Address AS a ON custa.addressid = a.addressid
 WHERE city = "Dallas";
+````
 
 Q: How many items with ListPrice more than $1000 have been sold?
 
+````sql
 SELECT SUM(orderqty) AS Num_Sold
 FROM SalesOrderDetail
 WHERE productid IN (SELECT productid 
                     FROM Product 
                     WHERE listprice > 1000);
+````
 
 Q: Give the CompanyName of those customers with orders over $100000. Include the subtotal plus tax plus freight.
 
+````sql
 SELECT companyname
 FROM Customer AS c
 JOIN SalesOrderHeader AS soh ON c.customerid = soh.customerid
 WHERE commnt > 100000;
+````
 
 Q: Find the number of left racing socks ('Racing Socks, L') ordered by CompanyName 'Riding Cycles'.
 
+````sql
 SELECT SUM(orderqty) AS Num_Ordered
 FROM Customer AS c
 JOIN SalesOrderHeader AS soh ON c.customerid = soh.customerid
 JOIN SalesOrderDetail AS sod ON soh.salesorderid = sod.salesorderid 
 JOIN Product AS p ON sod.productid = p.productid
 WHERE companyname = "Riding Cycles" AND name = "Racing Socks, L";
+````
 
 Q: A "Single Item Order" is a customer order where only one item is ordered. Show the SalesOrderID and the UnitPrice 
 for every Single Item Order.
 
+````sql
 SELECT salesorderid, unitprice
 FROM SalesOrderDetail
 WHERE salesorderid IN (
@@ -49,36 +60,44 @@ WHERE salesorderid IN (
                        GROUP BY salesorderid
                        HAVING COUNT(productid) = 1
                        );
+````
 
 Q: Where did the racing socks go? List the product name and the CompanyName for all Customers who ordered ProductModel 
 'Racing Socks'.
 
+````sql
 SELECT name, companyname
 FROM Product AS p
 RIGHT JOIN SalesOrderDetail AS sod ON p.productid = sod.productid
 JOIN SalesOrderHeader AS soh ON sod.salesorderid = soh.salesorderid 
 JOIN Customer AS c ON soh.customerid = c.customerid
 WHERE productmodelid = (SELECT productmodelid FROM ProductModel WHERE name LIKE "%Racing Socks%")
+````
 
 Q: Show the product description for culture 'fr' for product with ProductID 736.
 
+````sql
 SELECT description
 FROM ProductDescription AS pd 
 JOIN ProductModelProductDescription AS pmpd ON pd.productdescriptionid = pmpd.productdescriptionid
 JOIN ProductModel AS pm ON pmpd.productmodelid = pm.productmodelid
 JOIN Product AS p ON pm.productmodelid = p.productmodelid
 WHERE culture = "fr" AND productid = 736;
+````
 
 Q: Use the SubTotal value in SaleOrderHeader to list orders from the largest to the smallest. For each order show the 
 CompanyName and the SubTotal and the total weight of the order.
 
+````sql
 SELECT salesorderid, companyname, subtotal, freight
 FROM SalesOrderHeader AS soh
 LEFT JOIN Customer AS c ON soh.customerid = c.customerid
 ORDER BY subtotal DESC;
+````
 
 Q: How many products in ProductCategory 'Cranksets' have been sold to an address in 'London'?
 
+````sql
 SELECT SUM(orderqty) AS Num_Products 
 FROM Product AS p
 RIGHT JOIN SalesOrderDetail AS sod ON p.productid = sod.productid
@@ -86,10 +105,12 @@ JOIN SalesOrderHeader AS soh ON sod.salesorderid = soh.salesorderid
 LEFT JOIN Address AS a ON soh.billtoaddressid = a.addressid
 WHERE productcategoryid = (SELECT productcategoryid FROM ProductCategory WHERE name LIKE "%Cranksets%") 
       AND city = "London";
+````
 
 Q: For every customer with a 'Main Office' in Dallas show AddressLine1 of the 'Main Office' and AddressLine1 of the 
 'Shipping' address - if there is no shipping address leave it blank. Use one row per customer.
 
+````sql
 SELECT main_addresses.customerid, main, shipping
 FROM
 (
@@ -106,17 +127,20 @@ JOIN CustomerAddress AS ca ON a.addressid = ca.addressid
 WHERE addresstype = "Shipping"
 ) AS shipping_addresses
 ON main_addresses.customerid = shipping_addresses.customerid
+````
 
 Q: For each order show the SalesOrderID and SubTotal calculated three ways:
 A) From the SalesOrderHeader
 B) Sum of OrderQty*UnitPrice
 C) Sum of OrderQty*ListPrice
 
+````sql
 SELECT soh.salesorderid, subtotal AS c1, SUM(orderqty*unitprice) AS c2, SUM(orderqty*listprice) AS c3
 FROM SalesOrderHeader AS soh 
 JOIN SalesOrderDetail AS sod ON soh.salesorderid = sod.salesorderid
 LEFT JOIN Product AS p ON sod.productid = p.productid
 GROUP BY salesorderid, c1
+````
 
 Q: Show how many orders are in the following ranges (in $):
 RANGE      Num Orders      Total Value
@@ -125,6 +149,7 @@ RANGE      Num Orders      Total Value
 1000-9999
 10000-
 
+````sql
 SELECT
     CASE 
         WHEN commnt BETWEEN 0 AND 99 THEN '0-99'
@@ -143,9 +168,11 @@ GROUP BY
         WHEN commnt >= 10000 THEN '10000+'
     END
 ORDER BY Num_Range ASC;
+````
 
 Q: Identify the three most important cities. Show the break down of top level product category against city.
 
+````sql
 -- Top 3 cities by dollar value (Woolston, London, Union City) 
 SELECT city, SUM(orderqty*unitprice) AS Total_Value
 FROM Address AS a
@@ -203,26 +230,32 @@ LEFT JOIN Product AS p ON pc.productcategoryid = p.productcategoryid
 LEFT JOIN SalesOrderDetail AS sod ON p.productid = sod.productid
 GROUP BY pc.name, Woolston_Value, London_Value, UnionCity_Value
 ORDER BY Total_Value DESC
+````
 
 Q: List the SalesOrderNumber for the customer 'Good Toys' 'Bike World'.
 
+````sql
 SELECT companyname, salesorderid
 FROM Customer AS c
 JOIN SalesOrderHeader AS soh ON c.customerid = soh.customerid 
 WHERE companyname IN ("Good Toys", "Bike World");'
+````
 
 Q: List the ProductName and the quantity of what was ordered by 'Futuristic Bikes'.
 
+````sql
 SELECT name, orderqty
 FROM Product AS p
 JOIN SalesOrderDetail AS sod ON p.productid = sod.productid
 JOIN SalesOrderHeader AS soh ON sod.salesorderid = soh.salesorderid 
 JOIN Customer AS c ON soh.customerid = c.customerid 
 WHERE companyname = "Futuristic Bikes";
+````
 
 Q: List the name and addresses of companies containing the word 'Bike' (upper or lower case) and companies 
 containing 'cycle' (upper or lower case). Ensure that the 'bike's are listed before the 'cycles's.
 
+````sql
 SELECT companyname, addressline1
 FROM Customer AS c
 JOIN CustomerAddress AS ca ON c.customerid = ca.customerid 
@@ -236,17 +269,21 @@ FROM Customer AS c
 JOIN CustomerAddress AS ca ON c.customerid = ca.customerid 
 JOIN Address AS a ON ca.addressid = a.addressid
 WHERE UPPER(companyname) LIKE "%CYCLE%"
+````
 
 Q: Show the total order value for each CountryRegion. List by value with the highest first.
 
+````sql
 SELECT countyregion, ROUND(SUM(commnt), 2) AS Total_Order_Value
 FROM Address AS a
 LEFT JOIN SalesOrderHeader AS soh ON a.addressid = soh.billtoaddressid
 GROUP BY countyregion
 ORDER BY Total_Order_Value DESC;
+````
 
 Q: Find the best customer in each region.
 
+````sql
 SELECT countyregion, companyname, total_value 
 FROM
 (
@@ -276,3 +313,4 @@ GROUP BY countyregion, companyname
 ORDER BY SUM(commnt) DESC
 LIMIT 1
 ) AS us;
+````
