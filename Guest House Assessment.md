@@ -9,54 +9,67 @@ Some background information for the data:
 
 Q: Guest 1183. Give the booking_date and the number of nights for guest 1183.
 
+````sql
 SELECT DATE_FORMAT(booking_date, '%Y-%m-%d') AS booking_date, nights
 FROM booking AS b
 JOIN guest AS g ON g.id = b.guest_id
 WHERE id = 1183;
+````
 
 Q: When do they get here? List the arrival time and the first and last names for all guests due to arrive on 2016-11-05, 
 order the output by time of arrival.
 
+````sql
 SELECT arrival_time, first_name, last_name
 FROM booking AS b
 JOIN guest AS g ON b.guest_id = g.id
 WHERE DATE_FORMAT(booking_date, '%Y-%m-%d') LIKE "2016-11-05"
 ORDER BY arrival_time ASC;
+````
 
 Q: Look up daily rates. Give the daily rate that should be paid for bookings with ids 5152, 5165, 5154 and 5295. 
 Include booking id, room type, number of occupants and the amount.
 
+````sql
 SELECT booking_id, room_type_requested, occupants, amount 
 FROM booking AS b
 JOIN rate AS r ON b.room_type_requested = r.room_type AND b.occupants = r.occupancy
 WHERE booking_id IN (5152, 5165, 5154, 5295);
+````
 
 Q: Who’s in 101? Find who is staying in room 101 on 2016-12-03, include first name, last name and address.
 
+````sql
 SELECT first_name, last_name, address
 FROM guest AS g
 JOIN booking AS b ON g.id = b.guest_id 
 WHERE room_no = 101 AND DATE_FORMAT(booking_date, '%Y-%m-%d') LIKE "2016-12-03";
+````
 
 Q: How many bookings, how many nights? For guests 1185 and 1270 show the number of bookings made and the total number of 
 nights. Your output should include the guest id and the total number of bookings and the total number of nights.
 
+````sql
 SELECT guest_id, COUNT(booking_id) AS num_bookings, SUM(nights) AS total_nights
 FROM booking
 WHERE guest_id IN (1185, 1270)
 GROUP BY guest_id;
+````
 
 Q: Ruth Cadbury. Show the total amount payable by guest Ruth Cadbury for her room bookings. You should JOIN to the rate 
 table using room_type_requested and occupants.
 
+````sql
 SELECT SUM(nights*amount) AS total_payable
 FROM booking AS b
 JOIN rate AS r ON b.room_type_requested = r.room_type AND b.occupants = r.occupancy
 JOIN guest AS g ON b.guest_id = g.id
 WHERE first_name = "Ruth" AND last_name = "Cadbury";
+````
 
 Q: Including Extras. Calculate the total bill for booking 5346 including extras.
 
+````sql
 SELECT SUM(nights*amount) + 
        (SELECT SUM(amount)
         FROM extra
@@ -64,11 +77,13 @@ SELECT SUM(nights*amount) +
 FROM booking AS b
 JOIN rate AS r ON b.room_type_requested = r.room_type AND b.occupants = r.occupancy
 WHERE booking_id = 5346 
+````
 
 Q: Edinburgh Residents. For every guest who has the word “Edinburgh” in their address show the total number of nights 
 booked. Be sure to include 0 for those guests who have never had a booking. Show last name, first name, address and 
 number of nights. Order by last name then first name.
 
+````sql
 SELECT last_name, first_name, address, 
        CASE
           WHEN SUM(nights) != 0 THEN SUM(nights)
@@ -79,19 +94,23 @@ LEFT JOIN booking AS b ON g.id = b.guest_id
 WHERE address LIKE "%Edinburgh%"
 GROUP BY last_name, first_name, address 
 ORDER BY last_name, first_name;
+````
 
 Q: How busy are we? For each day of the week beginning 2016-11-25 show the number of bookings starting that day. Be sure 
 to show all the days of the week in the correct order.
 
+````sql
 SELECT DATE_FORMAT(booking_date, '%Y-%m-%d') AS i, COUNT(booking_id) AS arrivals
 FROM booking 
 WHERE DATE_FORMAT(booking_date, '%Y-%m-%d') BETWEEN "2016-11-25" AND "2016-12-01"
 GROUP BY i
 ORDER BY i ASC;
+````
 
 Q: How many guests? Show the number of guests in the hotel on the night of 2016-11-21. Include all occupants who checked in
 that day but not those who checked out.
 
+````sql
 WITH booking_info_cte AS 
 (
 SELECT booking_id,
@@ -103,10 +122,12 @@ FROM booking
 SELECT SUM(occupants) 
 FROM booking_info_cte
 WHERE check_in <= "2016-11-21" AND check_out > "2016-11-21";
+````
 
 Q: Coincidence. Have two guests with the same surname ever stayed in the hotel on the evening? Show the last name and 
 both first names. Do not include duplicates.
 
+````sql
 WITH booking_info_cte AS 
 (
 SELECT booking_id, guest_id, first_name, last_name, 
@@ -124,11 +145,13 @@ JOIN booking_info_cte AS b
    AND a.check_in < b.check_out 
    AND a.check_out > b.check_in
    AND a.first_name < b.first_name
+````
 
 Q: Check out per floor. The first digit of the room number indicates the floor – e.g. room 201 is on the 2nd floor. 
 For each day of the week beginning 2016-11-14 show how many rooms are being vacated that day by floor number. Show all 
 days in the correct order.
 
+````sql
 WITH booking_info_cte AS
 (
 SELECT booking_id, room_no, 
@@ -144,3 +167,4 @@ SELECT check_out,
 FROM booking_info_cte 
 GROUP BY check_out 
 ORDER BY check_out
+````
