@@ -7,6 +7,7 @@ Some background information for the data:
 - The amount charged depends on the room type and the number of people staying and the number of nights
 - Guests may be charged extras (for breakfast or using the minibar)
 
+
 Q: Guest 1183. Give the booking_date and the number of nights for guest 1183.
 
 ````sql
